@@ -1,5 +1,6 @@
 name: camera_filters
-description: This package will use camera with dynamic color list of filters, crop your image, text on image and change the text color.
+description: This package will use camera with dynamic color list of filters,
+  crop your image, text on image and change the text color.
 version: 0.2.2
 homepage: https://github.com/hamzasidd3634/camera_filter
 
@@ -8,33 +9,30 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  camera: ^0.10.5+2
   flutter:
     sdk: flutter
-
-  camera: ^0.10.5+2
-  flutter_native_image: ^0.0.6+1
-  path_provider: ^2.0.15
-  image_cropper: ^4.0.1
   flutter_colorpicker: ^1.0.3
-  image: ^4.0.17
+  flutter_native_image: ^0.0.6+1
   get_storage: ^2.1.1
-  google_fonts: ^4.0.3
+  google_fonts: ^5.1.0
+  image: ^4.0.17
+  image_cropper: ^5.0.0
+  image_picker: ^1.0.1
+  path_provider: ^2.0.15
   vector_math: ^2.1.4
-  video_player: ^2.6.1
+  video_player: ^2.7.0
 #  ffmpeg_kit_flutter_min: ^5.1.0
-
 dev_dependencies:
+  analyzer: null
+  flutter_lints: ^2.0.1
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.1
-  analyzer:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
 # The following section is specific to Flutter.
 flutter:
-
   plugin:
     platforms:
       android:
@@ -43,69 +41,63 @@ flutter:
       ios:
         pluginClass: VideoEditorPlugin
 
-
-
   # To add assets to your package, add an assets section, like this:
   assets:
     - assets/
-  #
   # For details regarding assets in packages, see
   # https://flutter.dev/assets-and-images/#from-packages
   #
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
-
   # To add custom fonts to your package, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-
-#   fonts:
-#     - family: Cookie
-#       fonts:
-#         - asset: assets/Cookie-Regular.ttf
-#
-#     - family: Courgette
-#       fonts:
-#         - asset: assets/Courgette-Regular.ttf
-#
-#     - family: Montserrat
-#       fonts:
-#         - asset: assets/Montserrat-VariableFont_wght.ttf
-#
-#     - family: NotoSans
-#       fonts:
-#         - asset: assets/NotoSans-Light.ttf
-#
-#     - family: Pacifico
-#       fonts:
-#         - asset: assets/Pacifico-Regular.ttf
-#
-#     - family: PlayfairDisplay
-#       fonts:
-#         - asset: assets/PlayfairDisplay-Italic-VariableFont_wght.ttf
-#
-#     - family: Rajdhani
-#       fonts:
-#         - asset: assets/Rajdhani-Regular.ttf
-#
-#     - family: Raleway
-#       fonts:
-#         - asset: assets/Raleway-VariableFont_wght.ttf
-#
-#     - family: Roboto
-#       fonts:
-#         - asset: assets/Roboto-Light.ttf
-#
-#     - family: SourceCodePro
-#       fonts:
-#         - asset: assets/SourceCodePro-Italic-VariableFont_wght.ttf
-#
-#     - family: TiroDevanagariSanskrit
-#       fonts:
-#         - asset: assets/TiroDevanagariSanskrit-Regular.ttf
-
+  #   fonts:
+  #     - family: Cookie
+  #       fonts:
+  #         - asset: assets/Cookie-Regular.ttf
+  #
+  #     - family: Courgette
+  #       fonts:
+  #         - asset: assets/Courgette-Regular.ttf
+  #
+  #     - family: Montserrat
+  #       fonts:
+  #         - asset: assets/Montserrat-VariableFont_wght.ttf
+  #
+  #     - family: NotoSans
+  #       fonts:
+  #         - asset: assets/NotoSans-Light.ttf
+  #
+  #     - family: Pacifico
+  #       fonts:
+  #         - asset: assets/Pacifico-Regular.ttf
+  #
+  #     - family: PlayfairDisplay
+  #       fonts:
+  #         - asset: assets/PlayfairDisplay-Italic-VariableFont_wght.ttf
+  #
+  #     - family: Rajdhani
+  #       fonts:
+  #         - asset: assets/Rajdhani-Regular.ttf
+  #
+  #     - family: Raleway
+  #       fonts:
+  #         - asset: assets/Raleway-VariableFont_wght.ttf
+  #
+  #     - family: Roboto
+  #       fonts:
+  #         - asset: assets/Roboto-Light.ttf
+  #
+  #     - family: SourceCodePro
+  #       fonts:
+  #         - asset: assets/SourceCodePro-Italic-VariableFont_wght.ttf
+  #
+  #     - family: TiroDevanagariSanskrit
+  #       fonts:
+  #         - asset: assets/TiroDevanagariSanskrit-Regular.ttf
   #
   # For details regarding fonts in packages, see
   # https://flutter.dev/custom-fonts/#from-packages

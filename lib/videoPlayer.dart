@@ -23,8 +23,7 @@ class VideoPlayer extends StatefulWidget {
   bool applyFilters;
   Function(dynamic)? onVideoDone;
 
-  VideoPlayer(this.video,
-      {this.onVideoDone, this.sendButtonWidget, this.applyFilters = true});
+  VideoPlayer(this.video, {this.onVideoDone, this.sendButtonWidget, this.applyFilters = true});
 
   @override
   State<VideoPlayer> createState() => _VideoPlayersState();
@@ -118,46 +117,16 @@ class _VideoPlayersState extends State<VideoPlayer> {
 
   @override
   void initState() {
+    super.initState();
     progressDialog = ProgressDialog(context);
-    _controller = ValueNotifier(const Controller().copyWith(
-        mode: PaintMode.freeStyle, strokeWidth: 2, color: Colors.white));
+    _controller = ValueNotifier(const Controller().copyWith(mode: PaintMode.freeStyle, strokeWidth: 2, color: Colors.white));
     textDelegate = TextDelegate();
     _videoPlayerController = VideoPlayerController.file(File(widget.video!));
 
-    _videoPlayerController.addListener(() {
-      // setState(() {});
-    });
+    _videoPlayerController.addListener(() {});
     _videoPlayerController.setLooping(true);
     _videoPlayerController.initialize().then((_) => setState(() {}));
     _videoPlayerController.play();
-    // BetterPlayerConfiguration betterPlayerConfiguration =
-    //     BetterPlayerConfiguration(
-    //   aspectRatio: 0.5,
-    //   fit: BoxFit.fill,
-    //   autoPlay: true,
-    //   looping: true,
-    //   subtitlesConfiguration: //a == null?BetterPlayerSubtitlesConfiguration():
-    //       BetterPlayerSubtitlesConfiguration(fontColor: Colors.transparent),
-    //   controlsConfiguration: BetterPlayerControlsConfiguration(
-    //       iconsColor: Colors.transparent,
-    //       textColor: Colors.transparent,
-    //       progressBarPlayedColor: Colors.transparent,
-    //       progressBarBackgroundColor: Colors.transparent,
-    //       progressBarBufferedColor: Colors.transparent,
-    //       progressBarHandleColor: Colors.transparent),
-    //   expandToFill: true,
-    //   deviceOrientationsAfterFullScreen: [
-    //     DeviceOrientation.portraitDown,
-    //     DeviceOrientation.portraitUp
-    //   ],
-    // );
-    // _betterPlayerDataSource = BetterPlayerDataSource(
-    //   BetterPlayerDataSourceType.file,
-    //   widget.video!,
-    // );
-    // _betterPlayerController = BetterPlayerController(betterPlayerConfiguration);
-    // _betterPlayerController.setupDataSource(_betterPlayerDataSource);
-    super.initState();
   }
 
   @override
@@ -182,8 +151,7 @@ class _VideoPlayersState extends State<VideoPlayer> {
                     valueListenable: _filterColor,
                     builder: (context, value, child) {
                       return ColorFiltered(
-                        colorFilter: ColorFilter.mode(
-                            _filterColor.value, BlendMode.softLight),
+                        colorFilter: ColorFilter.mode(_filterColor.value, BlendMode.softLight),
                         child: video.VideoPlayer(_videoPlayerController),
                       );
                     })),
@@ -253,8 +221,7 @@ class _VideoPlayersState extends State<VideoPlayer> {
                     behavior: HitTestBehavior.opaque,
                     onTap: () async {
                       var tempDir = await getTemporaryDirectory();
-                      final path =
-                          '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}result.mp4';
+                      final path = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}result.mp4';
                       // Uint8List? bitmap;
                       // final String inputWatermark = await rootBundle
                       //     .loadString('assets/logo.png')
@@ -300,33 +267,21 @@ class _VideoPlayersState extends State<VideoPlayer> {
 
                         if (text == "" && _filterColor.value.value == 0) {
                           widget.onVideoDone!.call(widget.video);
-                        } else if (text == "" &&
-                            _filterColor.value.value != 0) {
+                        } else if (text == "" && _filterColor.value.value != 0) {
                           final tapiocaBalls = [
-                            TapiocaBall.filterFromColor(
-                                Color(_filterColor.value.value)),
+                            TapiocaBall.filterFromColor(Color(_filterColor.value.value)),
                           ];
                           makeVideo(tapiocaBalls, path);
-                        } else if (text != "" &&
-                            _filterColor.value.value == 0) {
+                        } else if (text != "" && _filterColor.value.value == 0) {
                           final tapiocaBalls = [
-                            TapiocaBall.textOverlay(
-                                text,
-                                int.parse(a.toString().split(".")[0]),
-                                int.parse(b.toString().split(".")[0]),
-                                (fontSize * 2).toInt(),
+                            TapiocaBall.textOverlay(text, int.parse(a.toString().split(".")[0]), int.parse(b.toString().split(".")[0]), (fontSize * 2).toInt(),
                                 Color(colorValue.value))
                           ];
                           makeVideo(tapiocaBalls, path);
                         } else {
                           final tapiocaBalls = [
-                            TapiocaBall.filterFromColor(
-                                Color(_filterColor.value.value)),
-                            TapiocaBall.textOverlay(
-                                text,
-                                int.parse(a.toString().split(".")[0]),
-                                int.parse(b.toString().split(".")[0]),
-                                (fontSize * 2).toInt(),
+                            TapiocaBall.filterFromColor(Color(_filterColor.value.value)),
+                            TapiocaBall.textOverlay(text, int.parse(a.toString().split(".")[0]), int.parse(b.toString().split(".")[0]), (fontSize * 2).toInt(),
                                 Color(colorValue.value))
                           ];
                           makeVideo(tapiocaBalls, path);
@@ -339,9 +294,7 @@ class _VideoPlayersState extends State<VideoPlayer> {
                         Container(
                           height: 60,
                           width: 60,
-                          decoration: BoxDecoration(
-                              color: Color(0xffd51820),
-                              borderRadius: BorderRadius.circular(60)),
+                          decoration: BoxDecoration(color: Color(0xffd51820), borderRadius: BorderRadius.circular(60)),
                           child: Center(
                             child: Icon(Icons.send),
                           ),
@@ -447,23 +400,18 @@ class _VideoPlayersState extends State<VideoPlayer> {
 
   Widget textField(context) {
     return Padding(
-      padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 10,
-          right: 10),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 10, right: 10),
       child: Container(
         height: 55,
         alignment: Alignment.bottomCenter,
-        decoration: BoxDecoration(
-            color: Colors.white, borderRadius: BorderRadius.circular(30)),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(30)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
               child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 0.0, horizontal: 3),
+                  padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 3),
                   child: TextFormField(
                       cursorColor: Colors.black,
                       autofocus: true,
@@ -517,8 +465,7 @@ class _VideoPlayersState extends State<VideoPlayer> {
                 MediaQuery.of(context).size.width,
                 300,
               ),
-              painter: MyPainter(
-                  xPos, yPos, text, Color(colorValue.value), fontSize),
+              painter: MyPainter(xPos, yPos, text, Color(colorValue.value), fontSize),
               child: Container(),
             );
           }),
@@ -566,7 +513,6 @@ class MyPainter extends CustomPainter {
     return true;
   }
 }
-
 
 class VideoPla extends StatelessWidget {
   const VideoPla({Key? key}) : super(key: key);
