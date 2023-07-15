@@ -1409,5 +1409,4 @@ class _CameraScreenState extends State<CameraScreenPlugin> with TickerProviderSt
   //       ),
   //     ),
   //   );
-  // }
 }
