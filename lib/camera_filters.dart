@@ -424,7 +424,7 @@ class _CameraScreenState extends State<CameraScreenPlugin> with TickerProviderSt
       _currentFlashMode = controller?.value.flashMode;
     });
 
-    camLoading = true;
+    camLoading = false;
     setState(() {});
   }
 
