@@ -26,8 +26,7 @@ class RangedSlider extends StatelessWidget {
 ///
 class FontRangedSlider extends StatelessWidget {
   ///Range Slider widget for font size
-  const FontRangedSlider({Key? key, this.value, this.onChanged})
-      : super(key: key);
+  const FontRangedSlider({Key? key, this.value, this.onChanged}) : super(key: key);
 
   ///Default value of font size.
   final double? value;
@@ -50,8 +49,7 @@ class FontRangedSlider extends StatelessWidget {
 ///
 class FontVideoRangedSlider extends StatelessWidget {
   ///Range Slider widget for font size
-  const FontVideoRangedSlider({Key? key, this.value, this.onChanged})
-      : super(key: key);
+  const FontVideoRangedSlider({Key? key, this.value, this.onChanged}) : super(key: key);
 
   ///Default value of font size.
   final double? value;
@@ -66,6 +64,8 @@ class FontVideoRangedSlider extends StatelessWidget {
       min: 18,
       divisions: 19,
       value: value!,
+      thumbColor: Color.fromRGBO(240, 128, 55, 1),
+      activeColor: Color.fromRGBO(240, 128, 55, 1).withOpacity(.4),
       onChanged: onChanged,
     );
   }

@@ -18,7 +18,7 @@ class GlColorBlendFilter(filter: Filter) : GlFilter(GlFilter.DEFAULT_VERTEX_SHAD
         uniform lowp float blue;
         void main() {
            vec4 color = vec4(red,green,blue,0.1);
-           gl_FragColor = mix(texture2D(sTexture, vTextureCoord), color, 0.5);
+           gl_FragColor = mix(texture2D(sTexture, vTextureCoord), color, 0.1);
        }
        """
     }

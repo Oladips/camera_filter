@@ -4,18 +4,17 @@ import "dart:ui";
 /// TapiocaBall is a effect to apply to the video.
 abstract class TapiocaBall {
   /// Creates a object to apply color filter from [Filters].
-  static TapiocaBall filter(Filters filter) {
-    return _Filter(filter);
+  static TapiocaBall filter(Filters filter, double degree) {
+    return _Filter(filter, degree);
   }
 
   /// Creates a object to apply color filter from [Color].
-  static TapiocaBall filterFromColor(Color color) {
-    return _Filter.color(color);
+  static TapiocaBall filterFromColor(Color color, double degree) {
+    return _Filter.color(color, degree);
   }
 
   /// Creates a object to overlay text.
-  static TapiocaBall textOverlay(
-      String text, int x, int y, int size, Color color) {
+  static TapiocaBall textOverlay(String text, int x, int y, int size, Color color) {
     return _TextOverlay(text, x, y, size, color);
   }
 
@@ -36,7 +35,9 @@ enum Filters { pink, white, blue }
 
 class _Filter extends TapiocaBall {
   late String color;
-  _Filter(Filters type) {
+  late double degree;
+
+  _Filter(Filters type, double degree) {
     switch (type) {
       case Filters.pink:
         this.color = "#ffc0cb";
@@ -47,13 +48,22 @@ class _Filter extends TapiocaBall {
       case Filters.blue:
         this.color = "#1f8eed";
     }
+    this.degree = degree;
   }
-  _Filter.color(Color colorInstance) {
+
+  _Filter.color(
+    Color colorInstance,
+    double degree,
+  ) {
     this.color = '#${colorInstance.value.toRadixString(16).substring(2)}';
+    this.degree = degree;
   }
 
   Map<String, dynamic> toMap() {
-    return {'type': color};
+    return {
+      'type': color,
+      'degree': degree,
+    };
   }
 
   String toTypeName() {
@@ -70,13 +80,7 @@ class _TextOverlay extends TapiocaBall {
   _TextOverlay(this.text, this.x, this.y, this.size, this.color);
 
   Map<String, dynamic> toMap() {
-    return {
-      'text': text,
-      'x': x,
-      'y': y,
-      'size': size,
-      'color': '#${color.value.toRadixString(16).substring(2)}'
-    };
+    return {'text': text, 'x': x, 'y': y, 'size': size, 'color': '#${color.value.toRadixString(16).substring(2)}'};
   }
 
   String toTypeName() {
