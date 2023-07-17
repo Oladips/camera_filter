@@ -18,7 +18,7 @@ import 'zettlo/filter_selector.dart';
 @immutable
 class CameraScreenPlugin extends StatefulWidget {
   Function(dynamic)? onDone;
-  Function(dynamic)? onVideoDone;
+  Function(String)? onVideoDone;
   List<Color>? filters;
   bool applyFilters;
   List<Color>? gradientColors;
@@ -29,8 +29,6 @@ class CameraScreenPlugin extends StatefulWidget {
   final String cuatomCameraSwitch;
   final String customFilterSwitch;
   final String customFilterImage;
-  final Widget selectTimer;
-  final Widget filterSelector;
   Widget? profileIconWidget;
   Widget? sendButtonWidget;
 
@@ -49,8 +47,6 @@ class CameraScreenPlugin extends StatefulWidget {
     required this.customOrangeCheckImage,
     required this.cuatomCameraSwitch,
     required this.customFilterSwitch,
-    required this.selectTimer,
-    required this.filterSelector,
     required this.customFilterImage,
   }) : super(key: key);
 
