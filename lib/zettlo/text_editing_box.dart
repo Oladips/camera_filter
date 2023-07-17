@@ -63,13 +63,15 @@ class _TextEditingBoxState extends State<TextEditingBox> {
             children: [
               InkWell(
                 onTap: () {
+                  if (textCon.text.trim().isEmpty) {
+                    return;
+                  }
                   final offsetx = (widget.controller.value.size.width / (MediaQuery.of(context).size.width - 100)) * (MediaQuery.of(context).size.width / 2);
                   final offsety = (widget.controller.value.size.height / heightFullScreen()) * (MediaQuery.of(context).size.height / 2);
                   final textModel = TextModel(
                     name: textCon.text,
                     fontsize: 32,
-                    textStyle: TextStyle(
-                      fontFamily: "Poppins",
+                    textStyle: GoogleFonts.poppins(
                       fontSize: 32,
                       color: Colors.white,
                       fontWeight: FontWeight.w400,

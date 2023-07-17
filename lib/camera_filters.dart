@@ -254,7 +254,6 @@ class _CameraScreenState extends State<CameraScreenPlugin> with TickerProviderSt
   stopVideoRecording() async {
     await controller?.stopVideoRecording().then(
       (value) async {
-        //Todo move the reset camera function oout of this place
         cameraUsage = false;
         recording = false;
         recordedFile = value;
@@ -427,258 +426,381 @@ class _CameraScreenState extends State<CameraScreenPlugin> with TickerProviderSt
             }
           }
         }
-        return SafeArea(
-          child: Stack(
-            children: [
-              Container(
-                height: widget.maxHeight * 0.92,
-                width: widget.maxWidth,
-                color: Colors.black,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
-                  child: Builder(builder: (context) {
-                    if (camLoading) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: Color.fromRGBO(240, 128, 55, 1),
+        return WillPopScope(
+          onWillPop: () async {
+            if (controller!.value.isRecordingVideo) {
+              return false;
+            }
+
+            return true;
+          },
+          child: SafeArea(
+            child: Stack(
+              children: [
+                Container(
+                  height: widget.maxHeight * 0.92,
+                  width: widget.maxWidth,
+                  color: Colors.black,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
+                    ),
+                    child: Builder(builder: (context) {
+                      if (camLoading) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: Color.fromRGBO(240, 128, 55, 1),
+                          ),
+                        );
+                      }
+                      return OverflowBox(
+                        alignment: Alignment.center,
+                        child: FittedBox(
+                          fit: BoxFit.cover,
+                          child: GestureDetector(
+                            onScaleStart: (details) {
+                              baseScale = zoomLevel;
+                              setState(() {});
+                            },
+                            onScaleUpdate: (scale) async {
+                              zoomLevel = (baseScale * scale.scale).clamp(minZoom, maxZoom);
+                              if (controller != null && controller!.value.isInitialized) {
+                                await controller?.setZoomLevel(zoomLevel);
+                              }
+
+                              setState(() {});
+                            },
+                            child: Container(
+                              width: widget.maxWidth,
+                              color: Colors.black,
+                              child: Builder(builder: (context) {
+                                if (controller != null && controller!.value.isInitialized) {
+                                  return ValueListenableBuilder(
+                                      valueListenable: _filterColor,
+                                      builder: (context, value, _) {
+                                        return ColorFiltered(
+                                          colorFilter: ColorFilter.mode(
+                                            _filterColor.value,
+                                            BlendMode.softLight,
+                                          ),
+                                          child: CameraPreview(
+                                            controller!,
+                                            child: LayoutBuilder(
+                                              builder: (context, constraints) {
+                                                return GestureDetector(
+                                                  behavior: HitTestBehavior.opaque,
+                                                  onTapDown: (details) {
+                                                    onViewFinderTap(details, constraints);
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      });
+                                }
+
+                                return SizedBox.shrink();
+                              }),
+                            ),
+                          ),
                         ),
                       );
-                    }
-                    return OverflowBox(
-                      alignment: Alignment.center,
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        child: GestureDetector(
-                          onScaleStart: (details) {
-                            baseScale = zoomLevel;
-                            setState(() {});
-                          },
-                          onScaleUpdate: (scale) async {
-                            zoomLevel = (baseScale * scale.scale).clamp(minZoom, maxZoom);
-                            if (controller != null && controller!.value.isInitialized) {
-                              await controller?.setZoomLevel(zoomLevel);
-                            }
+                    }),
+                  ),
+                ),
+                Builder(builder: (context) {
+                  if (isTimer) {
+                    return const SizedBox.shrink();
+                  }
+                  return Container(
+                    height: widget.maxHeight,
+                    width: widget.maxWidth,
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Builder(builder: (context) {
+                                    if (cameraUsage) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return InkWell(
+                                      onTap: () async {
+                                        if (controller != null && controller!.value.isInitialized) {
+                                          if (controller!.value.isRecordingVideo || controller!.value.isRecordingPaused) {
+                                            await stopVideoRecording();
+                                          }
+                                        }
 
-                            setState(() {});
-                          },
-                          child: Container(
-                            width: widget.maxWidth,
-                            color: Colors.black,
-                            child: Builder(builder: (context) {
-                              if (controller != null && controller!.value.isInitialized) {
-                                return ValueListenableBuilder(
-                                    valueListenable: _filterColor,
-                                    builder: (context, value, _) {
-                                      return ColorFiltered(
-                                        colorFilter: ColorFilter.mode(
-                                          _filterColor.value,
-                                          BlendMode.softLight,
-                                        ),
-                                        child: CameraPreview(
-                                          controller!,
-                                          child: LayoutBuilder(
-                                            builder: (context, constraints) {
-                                              return GestureDetector(
-                                                behavior: HitTestBehavior.opaque,
-                                                onTapDown: (details) {
-                                                  onViewFinderTap(details, constraints);
-                                                },
-                                              );
-                                            },
+                                        Navigator.pop(context);
+                                      },
+                                      child: Container(
+                                        height: 30,
+                                        width: 30,
+                                        child: SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: Icon(
+                                            Icons.arrow_back_ios_new_rounded,
+                                            color: Colors.white,
                                           ),
                                         ),
-                                      );
-                                    });
-                              }
-
-                              return SizedBox.shrink();
-                            }),
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-              Builder(builder: (context) {
-                if (isTimer) {
-                  return const SizedBox.shrink();
-                }
-                return Container(
-                  height: widget.maxHeight,
-                  width: widget.maxWidth,
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Builder(builder: (context) {
-                                  if (cameraUsage) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return InkWell(
-                                    onTap: () async {
-                                      if (controller != null && controller!.value.isInitialized) {
-                                        if (controller!.value.isRecordingVideo || controller!.value.isRecordingPaused) {
-                                          await stopVideoRecording();
-                                        }
-                                      }
-
-                                      // await camera.discardAndCancel();
-                                      Navigator.pop(context);
-                                    },
-                                    child: Container(
-                                      height: 30,
-                                      width: 30,
-                                      child: SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: Icon(
-                                          Icons.arrow_back_ios_new_rounded,
-                                          color: Colors.white,
+                                      ),
+                                    );
+                                  }),
+                                  Builder(builder: (context) {
+                                    if (cameraUsage) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return InkWell(
+                                      onTap: () async {
+                                        if (controller != null && controller!.value.isInitialized) {
+                                          if (controller!.value.isRecordingVideo || controller!.value.isRecordingPaused) {
+                                            await controller?.stopVideoRecording().then(
+                                              (value) async {
+                                                cameraUsage = false;
+                                                recording = false;
+                                                recordedFile = value;
+                                                recordingPaused = false;
+                                                d = null;
+                                                _recordedTime = 0.0;
+                                                stopRecorderTimer();
+                                                setState(() {});
+                                              },
+                                            );
+                                          } else {}
+                                        } else {}
+                                      },
+                                      child: Container(
+                                        height: 50,
+                                        width: 50,
+                                        child: SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: Icon(
+                                            Icons.clear,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                }),
-                                Builder(builder: (context) {
-                                  if (cameraUsage) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return InkWell(
-                                    onTap: () async {
-                                      if (controller != null && controller!.value.isInitialized) {
-                                        if (controller!.value.isRecordingVideo || controller!.value.isRecordingPaused) {
-                                          await stopVideoRecording();
-                                        } else {
-                                          // camera.discardAndCancel();
-                                        }
-                                      } else {
-                                        // camera.discardAndCancel();
-                                      }
-                                    },
-                                    child: Container(
-                                      height: 50,
-                                      width: 50,
-                                      child: SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: Icon(
-                                          Icons.clear,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                })
-                              ],
+                                    );
+                                  })
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 10),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: Stack(
+                            SizedBox(height: 10),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    height: 8,
+                                    padding: EdgeInsets.symmetric(horizontal: 24),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                  ),
+                                  AnimatedContainer(
+                                    duration: const Duration(seconds: 1),
+                                    width: (widget.maxWidth - 48) * (_recordedTime / 60),
+                                    height: 8,
+                                    padding: EdgeInsets.symmetric(horizontal: 24),
+                                    decoration: BoxDecoration(
+                                      color: Color.fromRGBO(240, 128, 55, 1),
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Container(
-                                  height: 8,
-                                  padding: EdgeInsets.symmetric(horizontal: 24),
+                                  height: 10,
+                                  width: 10,
                                   decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                SizedBox(width: 5),
+                                Text(
+                                  _recordedTime.toString(),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(24),
                                   ),
-                                ),
-                                AnimatedContainer(
-                                  duration: const Duration(seconds: 1),
-                                  width: (widget.maxWidth - 48) * (_recordedTime / 60),
-                                  height: 8,
-                                  padding: EdgeInsets.symmetric(horizontal: 24),
-                                  decoration: BoxDecoration(
-                                    color: Color.fromRGBO(240, 128, 55, 1),
-                                    borderRadius: BorderRadius.circular(24),
-                                  ),
-                                ),
+                                )
                               ],
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            )
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 36),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Container(
-                                height: 10,
-                                width: 10,
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              SizedBox(width: 5),
-                              Text(
-                                _recordedTime.toString(),
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 36),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Builder(builder: (context) {
-                              if (cameraUsage) {
-                                return SizedBox(
-                                  width: 60,
+                              Builder(builder: (context) {
+                                if (cameraUsage) {
+                                  return SizedBox(
+                                    width: 60,
+                                  );
+                                }
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () async {
+                                        await ImagePicker()
+                                            .pickVideo(
+                                          source: ImageSource.gallery,
+                                        )
+                                            .then(
+                                          (value) async {
+                                            cameraUsage = false;
+                                            recording = false;
+                                            recordingPaused = false;
+                                            recordedFile = value;
+                                            if (value != null) {
+                                              stopRecorderTimer();
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => VideoPlayer(
+                                                    value.path,
+                                                    filters: _filters,
+                                                    selectedFilter: _filterColor.value,
+                                                    onVideoDone: widget.onVideoDone,
+                                                  ),
+                                                ),
+                                              );
+                                            }
+
+                                            setState(() {});
+                                          },
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 60,
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                        ),
+                                        padding: EdgeInsets.all(7),
+                                        child: Image.asset(
+                                          widget.customGalleryImage,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      "Upload",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
                                 );
-                              }
-                              return Column(
+                              }),
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Container(
+                                    height: 80,
+                                    width: 80,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 500),
+                                    height: 80,
+                                    width: 80,
+                                    decoration: BoxDecoration(
+                                      color: Color.fromRGBO(240, 128, 55, 1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      if (controller != null && controller!.value.isInitialized) {
+                                        if (controller!.value.isRecordingPaused) {
+                                          resumeRecording();
+                                        } else if (controller!.value.isRecordingVideo) {
+                                          pauseRecording();
+                                        } else if (!controller!.value.isRecordingVideo) {
+                                          startRecording();
+                                        }
+                                      }
+                                    },
+                                    child: Container(
+                                      height: 64,
+                                      width: 64,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white,
+                                      ),
+                                      child: SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: Builder(
+                                          builder: (builder) {
+                                            if (recording && recordingPaused == false) {
+                                              return Icon(
+                                                Icons.pause_outlined,
+                                                color: Colors.red,
+                                                size: 30,
+                                              );
+                                            }
+
+                                            if (recording == false && recordingPaused) {
+                                              return Icon(
+                                                Icons.play_arrow_rounded,
+                                                color: Colors.red,
+                                                size: 30,
+                                              );
+                                            }
+
+                                            return Center(
+                                              child: Container(
+                                                height: 20,
+                                                width: 20,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   GestureDetector(
                                     onTap: () async {
-                                      await ImagePicker()
-                                          .pickVideo(
-                                        source: ImageSource.gallery,
-                                      )
-                                          .then(
-                                        (value) async {
-                                          cameraUsage = false;
-                                          recording = false;
-                                          recordingPaused = false;
-                                          recordedFile = value;
-                                          if (value != null) {
-                                            stopRecorderTimer();
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => VideoPlayer(
-                                                  value.path,
-                                                  filters: _filters,
-                                                  selectedFilter: _filterColor.value,
-                                                  onVideoDone: widget.onVideoDone,
-                                                ),
-                                              ),
-                                            );
-                                          }
-
-                                          setState(() {});
-                                        },
-                                      );
+                                      stopVideoRecording();
                                     },
                                     child: Container(
                                       width: 60,
@@ -688,14 +810,14 @@ class _CameraScreenState extends State<CameraScreenPlugin> with TickerProviderSt
                                       ),
                                       padding: EdgeInsets.all(7),
                                       child: Image.asset(
-                                        widget.customGalleryImage,
+                                        widget.customOrangeCheckImage,
                                         fit: BoxFit.contain,
                                       ),
                                     ),
                                   ),
                                   SizedBox(height: 5),
                                   Text(
-                                    "Upload",
+                                    "Continue",
                                     style: GoogleFonts.poppins(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
@@ -703,228 +825,68 @@ class _CameraScreenState extends State<CameraScreenPlugin> with TickerProviderSt
                                     ),
                                   ),
                                 ],
-                              );
-                            }),
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Container(
-                                  height: 80,
-                                  width: 80,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white.withOpacity(0.3),
-                                  ),
-                                ),
-                                AnimatedContainer(
-                                  duration: const Duration(milliseconds: 500),
-                                  height: 80,
-                                  width: 80,
-                                  decoration: BoxDecoration(
-                                    color: Color.fromRGBO(240, 128, 55, 1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () async {
-                                    if (controller != null && controller!.value.isInitialized) {
-                                      if (controller!.value.isRecordingPaused) {
-                                        resumeRecording();
-                                      } else if (controller!.value.isRecordingVideo) {
-                                        pauseRecording();
-                                      } else if (!controller!.value.isRecordingVideo) {
-                                        startRecording();
-                                      }
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                Positioned(
+                  top: 241,
+                  right: 0,
+                  child: Container(
+                    width: 77,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        bottomLeft: Radius.circular(24),
+                      ),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 22,
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 70,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: () async {
+                                  if (controller != null && controller!.value.isInitialized) {
+                                    if (controller!.value.isRecordingVideo || controller!.value.isRecordingPaused) {
+                                      controller?.setDescription(cameras[_isRearCameraSelected ? 1 : 0]);
+                                    } else {
+                                      onNewCameraSelected(cameras[_isRearCameraSelected ? 1 : 0]);
                                     }
-                                  },
-                                  child: Container(
-                                    height: 64,
-                                    width: 64,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white,
-                                    ),
-                                    child: SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: Builder(
-                                        builder: (builder) {
-                                          if (recording && recordingPaused == false) {
-                                            return Icon(
-                                              Icons.pause_outlined,
-                                              color: Colors.red,
-                                              size: 30,
-                                            );
-                                          }
-
-                                          if (recording == false && recordingPaused) {
-                                            return Icon(
-                                              Icons.play_arrow_rounded,
-                                              color: Colors.red,
-                                              size: 30,
-                                            );
-                                          }
-
-                                          return Center(
-                                            child: Container(
-                                              height: 20,
-                                              width: 20,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.red,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: () async {
-                                    stopVideoRecording();
-                                  },
-                                  child: Container(
-                                    width: 60,
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                    ),
-                                    padding: EdgeInsets.all(7),
+                                  }
+                                  setState(() {
+                                    _isRearCameraSelected = !_isRearCameraSelected;
+                                  });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(shape: BoxShape.circle),
+                                  child: SizedBox(
+                                    height: 30,
+                                    width: 30,
                                     child: Image.asset(
-                                      widget.customOrangeCheckImage,
+                                      widget.cuatomCameraSwitch,
                                       fit: BoxFit.contain,
                                     ),
                                   ),
                                 ),
-                                SizedBox(height: 5),
-                                Text(
-                                  "Continue",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-              Positioned(
-                top: 241,
-                right: 0,
-                child: Container(
-                  width: 77,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      bottomLeft: Radius.circular(24),
-                    ),
-                  ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 22,
-                  ),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 70,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            GestureDetector(
-                              onTap: () async {
-                                if (controller != null && controller!.value.isInitialized) {
-                                  if (controller!.value.isRecordingVideo || controller!.value.isRecordingPaused) {
-                                    controller?.setDescription(cameras[_isRearCameraSelected ? 0 : 1]);
-                                  } else {
-                                    onNewCameraSelected(cameras[_isRearCameraSelected ? 0 : 1]);
-                                  }
-                                }
-                                setState(() {
-                                  _isRearCameraSelected = !_isRearCameraSelected;
-                                });
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(shape: BoxShape.circle),
-                                child: SizedBox(
-                                  height: 30,
-                                  width: 30,
-                                  child: Image.asset(
-                                    widget.cuatomCameraSwitch,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 7),
-                            Expanded(
-                              child: Text(
-                                "Switch Camera",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Builder(builder: (context) {
-                        if (cameraUsage) {
-                          return SizedBox.shrink();
-                        }
-                        return SizedBox(
-                          height: 80,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(height: 10),
-                              GestureDetector(
-                                onTap: () async {
-                                  toggleFlash();
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Color.fromRGBO(19, 15, 38, 1.0),
-                                  ),
-                                  child: SizedBox(
-                                    height: 30,
-                                    width: 30,
-                                    child: Icon(
-                                      _currentFlashMode == FlashMode.off
-                                          ? Icons.flash_off_outlined
-                                          : _currentFlashMode == FlashMode.auto
-                                              ? Icons.flash_auto_rounded
-                                              : Icons.flash_on_rounded,
-                                      color: Colors.white,
-                                      size: 17,
-                                    ),
-                                  ),
-                                ),
                               ),
                               SizedBox(height: 7),
                               Expanded(
                                 child: Text(
-                                  "Flash",
+                                  "Switch Camera",
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.poppins(
                                     fontSize: 10,
@@ -932,207 +894,259 @@ class _CameraScreenState extends State<CameraScreenPlugin> with TickerProviderSt
                                     color: Colors.white,
                                   ),
                                 ),
-                              )
-                            ],
-                          ),
-                        );
-                      }),
-                      Builder(builder: (context) {
-                        if (cameraUsage) {
-                          return SizedBox.shrink();
-                        }
-
-                        return SizedBox(
-                          height: 80,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(height: 10),
-                              GestureDetector(
-                                onTap: () async {
-                                  if (isFilter.value) {
-                                    isFilter.value = false;
-                                  }
-
-                                  final s = await showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    isDismissible: true,
-                                    backgroundColor: Colors.transparent,
-                                    enableDrag: true,
-                                    builder: (context) {
-                                      return SelectTimer();
-                                    },
-                                  );
-
-                                  if (!mounted) return;
-                                  if (s != null) {
-                                    d = s;
-                                    setState(() {});
-                                  }
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Color.fromRGBO(19, 15, 38, 1.0),
-                                  ),
-                                  child: SizedBox(
-                                    height: 30,
-                                    width: 30,
-                                    child: Icon(
-                                      Icons.timer,
-                                      color: Colors.white,
-                                      size: 17,
-                                    ),
-                                  ),
-                                ),
                               ),
-                              SizedBox(height: 7),
-                              Expanded(
-                                child: Text(
-                                  "Timer",
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              )
                             ],
                           ),
-                        );
-                      }),
-                      Builder(builder: (context) {
-                        if (cameraUsage) {
-                          return SizedBox.shrink();
-                        }
-                        return SizedBox(
-                          height: 80,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(height: 10),
-                              GestureDetector(
-                                onTap: () async {
-                                  isFilterChange();
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Color.fromRGBO(19, 15, 38, 1.0),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10000),
+                        ),
+                        Builder(builder: (context) {
+                          if (cameraUsage) {
+                            return SizedBox.shrink();
+                          }
+                          return SizedBox(
+                            height: 80,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SizedBox(height: 10),
+                                GestureDetector(
+                                  onTap: () async {
+                                    toggleFlash();
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Color.fromRGBO(19, 15, 38, 1.0),
+                                    ),
                                     child: SizedBox(
                                       height: 30,
                                       width: 30,
-                                      child: Image.asset(
-                                        widget.customFilterSwitch,
+                                      child: Icon(
+                                        _currentFlashMode == FlashMode.off
+                                            ? Icons.flash_off_outlined
+                                            : _currentFlashMode == FlashMode.auto
+                                                ? Icons.flash_auto_rounded
+                                                : Icons.flash_on_rounded,
+                                        color: Colors.white,
+                                        size: 17,
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: 7),
-                              Expanded(
-                                child: Text(
-                                  "Filters",
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
+                                SizedBox(height: 7),
+                                Expanded(
+                                  child: Text(
+                                    "Flash",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
+                        }),
+                        Builder(builder: (context) {
+                          if (cameraUsage) {
+                            return SizedBox.shrink();
+                          }
+
+                          return SizedBox(
+                            height: 80,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SizedBox(height: 10),
+                                GestureDetector(
+                                  onTap: () async {
+                                    if (isFilter.value) {
+                                      isFilter.value = false;
+                                    }
+
+                                    final s = await showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      isDismissible: true,
+                                      backgroundColor: Colors.transparent,
+                                      enableDrag: true,
+                                      builder: (context) {
+                                        return SelectTimer();
+                                      },
+                                    );
+
+                                    if (!mounted) return;
+                                    if (s != null) {
+                                      d = s;
+                                      setState(() {});
+                                    }
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Color.fromRGBO(19, 15, 38, 1.0),
+                                    ),
+                                    child: SizedBox(
+                                      height: 30,
+                                      width: 30,
+                                      child: Icon(
+                                        Icons.timer,
+                                        color: Colors.white,
+                                        size: 17,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              )
-                            ],
-                          ),
-                        );
-                      }),
-                    ],
+                                SizedBox(height: 7),
+                                Expanded(
+                                  child: Text(
+                                    "Timer",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
+                        }),
+                        Builder(builder: (context) {
+                          if (cameraUsage) {
+                            return SizedBox.shrink();
+                          }
+                          return SizedBox(
+                            height: 80,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SizedBox(height: 10),
+                                GestureDetector(
+                                  onTap: () async {
+                                    isFilterChange();
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Color.fromRGBO(19, 15, 38, 1.0),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10000),
+                                      child: SizedBox(
+                                        height: 30,
+                                        width: 30,
+                                        child: Image.asset(
+                                          widget.customFilterSwitch,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 7),
+                                Expanded(
+                                  child: Text(
+                                    "Filters",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Builder(builder: (context) {
-                if (d == null) {
-                  return const SizedBox.shrink();
-                }
-
-                if (d! < 1) {
-                  return const SizedBox.shrink();
-                }
-                if (isTimer == false) {
-                  return const SizedBox.shrink();
-                }
-                return Center(
-                  child: AnimatedBuilder(
-                    animation: _controller,
-                    builder: (context, child) {
-                      return Container(
-                        child: Text(
-                          "$d",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.poppins(
-                            fontSize: _sizeAnimation.value,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }),
-              Builder(builder: (context) {
-                if (focusOffset == null) {
-                  return const SizedBox.shrink();
-                }
-                return Positioned(
-                  top: focusOffset?.dy,
-                  left: focusOffset?.dx,
-                  child: AnimatedBuilder(
-                    animation: _focusController,
-                    builder: (context, _) {
-                      return Icon(
-                        Icons.filter_center_focus_outlined,
-                        color: Colors.white,
-                        size: _focusSizeAnimation.value,
-                        weight: 0.1,
-                        fill: .1,
-                        grade: .1,
-                        opticalSize: 1,
-                      );
-                    },
-                  ),
-                );
-              }),
-              ValueListenableBuilder(
-                valueListenable: isFilter,
-                builder: (context, value, _) {
-                  if (value == true) {
-                    return Positioned(
-                      left: 0.0,
-                      right: 0.0,
-                      bottom: 0.0,
-                      child: FilterSelector(
-                        filterImage: widget.customFilterImage,
-                        filters: _filters,
-                        selectedFilter: _filterColor.value,
-                        onFilterChanged: _onFilterChanged,
-                        onTap: () {},
-                      ),
-                    );
+                Builder(builder: (context) {
+                  if (d == null) {
+                    return const SizedBox.shrink();
                   }
 
-                  return const SizedBox.shrink();
-                },
-              ),
-            ],
+                  if (d! < 1) {
+                    return const SizedBox.shrink();
+                  }
+                  if (isTimer == false) {
+                    return const SizedBox.shrink();
+                  }
+                  return Center(
+                    child: AnimatedBuilder(
+                      animation: _controller,
+                      builder: (context, child) {
+                        return Container(
+                          child: Text(
+                            "$d",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontSize: _sizeAnimation.value,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }),
+                Builder(builder: (context) {
+                  if (focusOffset == null) {
+                    return const SizedBox.shrink();
+                  }
+                  return Positioned(
+                    top: focusOffset?.dy,
+                    left: focusOffset?.dx,
+                    child: AnimatedBuilder(
+                      animation: _focusController,
+                      builder: (context, _) {
+                        return Icon(
+                          Icons.filter_center_focus_outlined,
+                          color: Colors.white,
+                          size: _focusSizeAnimation.value,
+                          weight: 0.1,
+                          fill: .1,
+                          grade: .1,
+                          opticalSize: 1,
+                        );
+                      },
+                    ),
+                  );
+                }),
+                ValueListenableBuilder(
+                  valueListenable: isFilter,
+                  builder: (context, value, _) {
+                    if (value == true) {
+                      return Positioned(
+                        left: 0.0,
+                        right: 0.0,
+                        bottom: 0.0,
+                        child: FilterSelector(
+                          filterImage: widget.customFilterImage,
+                          filters: _filters,
+                          selectedFilter: _filterColor.value,
+                          onFilterChanged: _onFilterChanged,
+                          onTap: () {},
+                        ),
+                      );
+                    }
+
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ],
+            ),
           ),
         );
       }),
