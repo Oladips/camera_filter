@@ -63,6 +63,8 @@ class _TextEditingBoxState extends State<TextEditingBox> {
             children: [
               InkWell(
                 onTap: () {
+                  final offsetx = (widget.controller.value.size.width / (MediaQuery.of(context).size.width - 100)) * (MediaQuery.of(context).size.width / 2);
+                  final offsety = (widget.controller.value.size.height / heightFullScreen()) * (MediaQuery.of(context).size.height / 2);
                   final textModel = TextModel(
                     name: textCon.text,
                     fontsize: 32,
@@ -75,6 +77,8 @@ class _TextEditingBoxState extends State<TextEditingBox> {
                     isSelected: true,
                     left: widthFullScreen() / 2,
                     top: heightFullScreen() / 2,
+                    textOffsetX: offsetx,
+                    textOffsetY: offsety - 130,
                     textAlign: TextAlign.center,
                     textColor: Colors.white,
                   );

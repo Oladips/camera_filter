@@ -305,13 +305,6 @@ class _VideoPlayersState extends State<VideoPlayer> {
                           ),
                           GestureDetector(
                             onTap: () async {
-                              isLoading = true;
-                              setState(() {});
-                              _videoPlayerController.pause();
-                              timer?.cancel();
-                              videoTime = 0.0;
-                              timer = null;
-
                               if (texts.isNotEmpty) {
                                 for (var element in texts) {
                                   final ball = TapiocaBall.textOverlay(
@@ -332,17 +325,14 @@ class _VideoPlayersState extends State<VideoPlayer> {
                                   ),
                                 );
                               }
+                              String? video;
+                              if (finishedPath == null) {
+                                video = widget.video;
+                              } else {
+                                video = finishedPath;
+                              }
 
-                              var tempDir = await getApplicationDocumentsDirectory();
-                              final path = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}result.mp4';
-                              await makeVideo(
-                                tapiocaBalls,
-                                path,
-                                widget.video,
-                              );
-                              texts.clear();
-                              isLoading = false;
-                              setState(() {});
+                              await makeVideo(tapiocaBalls, video);
                             },
                             child: Column(
                               children: [
@@ -385,8 +375,63 @@ class _VideoPlayersState extends State<VideoPlayer> {
                             children: [
                               GestureDetector(
                                 onTap: () async {
-                                  // Navigator.pop(context);
-                                  await (widget.onVideoDone ?? () {})(finishedPath);
+                                  if (finishedPath == null) {
+                                    if (widget.selectedFilter != Colors.transparent && texts.isEmpty) {
+                                      tapiocaBalls.add(
+                                        TapiocaBall.filterFromColor(
+                                          widget.selectedFilter!.withOpacity(.1),
+                                          100,
+                                        ),
+                                      );
+
+                                      await makeVideo(tapiocaBalls, widget.video);
+                                    }
+                                    if (widget.selectedFilter != Colors.transparent && texts.isNotEmpty) {
+                                      for (var element in texts) {
+                                        final ball = TapiocaBall.textOverlay(
+                                          element.name,
+                                          element.textOffsetX!.toInt() - 48,
+                                          element.textOffsetY!.toInt(),
+                                          (element.fontsize! * 1.5).toInt(),
+                                          element.textColor,
+                                        );
+                                        tapiocaBalls.add(ball);
+                                      }
+
+                                      tapiocaBalls.add(
+                                        TapiocaBall.filterFromColor(
+                                          widget.selectedFilter!.withOpacity(.1),
+                                          100,
+                                        ),
+                                      );
+
+                                      await makeVideo(tapiocaBalls, widget.video);
+                                    }
+
+                                    if (widget.selectedFilter == Colors.transparent && texts.isNotEmpty) {
+                                      for (var element in texts) {
+                                        final ball = TapiocaBall.textOverlay(
+                                          element.name,
+                                          element.textOffsetX!.toInt() - 48,
+                                          element.textOffsetY!.toInt(),
+                                          (element.fontsize! * 1.5).toInt(),
+                                          element.textColor,
+                                        );
+                                        tapiocaBalls.add(ball);
+                                      }
+
+                                      await makeVideo(tapiocaBalls, widget.video);
+                                    }
+
+                                    if (widget.selectedFilter == Colors.transparent && texts.isEmpty) {
+                                      finishedPath = widget.video;
+                                      Navigator.pop(context);
+                                      await (widget.onVideoDone ?? () {})(finishedPath);
+                                    }
+                                  } else {
+                                    Navigator.pop(context);
+                                    await (widget.onVideoDone ?? () {})(finishedPath);
+                                  }
                                 },
                                 child: Container(
                                   height: 60,
@@ -667,9 +712,18 @@ class _VideoPlayersState extends State<VideoPlayer> {
 
   makeVideo(
     tapiocaBalls,
-    path,
     video,
   ) async {
+    isLoading = true;
+    setState(() {});
+    _videoPlayerController.pause();
+    timer?.cancel();
+    videoTime = 0.0;
+    timer = null;
+
+    var tempDir = await getApplicationDocumentsDirectory();
+    final path = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}result.mp4';
+
     final cup = Cup(Content(video), tapiocaBalls);
     await cup.suckUp(path).then((_) async {
       _videoPlayerController.dispose();
@@ -680,8 +734,12 @@ class _VideoPlayersState extends State<VideoPlayer> {
       await _videoPlayerController.initialize().then((_) => setState(() {}));
       _videoPlayerController.play();
 
+      texts.clear();
       setState(() {});
       startTimer();
+
+      isLoading = false;
+      setState(() {});
     });
   }
 

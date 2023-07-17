@@ -96,8 +96,10 @@ class _CameraState extends State<Camera> {
         cuatomCameraSwitch: "cuatomCameraSwitch",
         customFilterSwitch: "customFilterSwitch",
         customFilterImage: "customFilterSwitch",
-        selectTimer: Container(),
-        filterSelector: Container(),
+        onVideoDone: (p0) {
+          print("object");
+          print(p0);
+        },
       ),
     );
   }
