@@ -385,7 +385,7 @@ class _VideoPlayersState extends State<VideoPlayer> {
                             children: [
                               GestureDetector(
                                 onTap: () async {
-                                  Navigator.pop(context);
+                                  // Navigator.pop(context);
                                   await (widget.onVideoDone ?? () {})(finishedPath);
                                 },
                                 child: Container(
