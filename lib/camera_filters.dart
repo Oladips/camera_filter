@@ -270,6 +270,8 @@ class _CameraScreenState extends State<CameraScreenPlugin> with TickerProviderSt
               filters: _filters,
               selectedFilter: _filterColor.value,
               onVideoDone: widget.onVideoDone,
+              customFilterImage: widget.customFilterImage,
+              customFilterSwitch: widget.customFilterSwitch,
             ),
           ),
         );
@@ -684,6 +686,8 @@ class _CameraScreenState extends State<CameraScreenPlugin> with TickerProviderSt
                                                     filters: _filters,
                                                     selectedFilter: _filterColor.value,
                                                     onVideoDone: widget.onVideoDone,
+                                                    customFilterImage: widget.customFilterImage,
+                                                    customFilterSwitch: widget.customFilterSwitch,
                                                   ),
                                                 ),
                                               );

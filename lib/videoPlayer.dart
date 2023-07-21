@@ -6,6 +6,7 @@ import 'package:camera_filters/src/painter.dart';
 import 'package:camera_filters/src/tapioca/content.dart';
 import 'package:camera_filters/src/tapioca/tapioca_ball.dart';
 import 'package:camera_filters/src/widgets/_range_slider.dart';
+import 'package:camera_filters/zettlo/filter_selector.dart';
 import 'package:camera_filters/zettlo/text_edit.dart';
 import 'package:camera_filters/zettlo/text_editing_box.dart';
 import 'package:flutter/material.dart';
@@ -21,15 +22,19 @@ import 'zettlo/model/text_model.dart';
 // ignore: must_be_immutable
 class VideoPlayer extends StatefulWidget {
   String? video;
-  final List<Color>? filters;
+  final List<Color> filters;
   final Color? selectedFilter;
+  final String customFilterSwitch;
+  final String customFilterImage;
   Function(String)? onVideoDone;
 
   VideoPlayer(
     this.video, {
     this.onVideoDone,
-    this.filters,
+    required this.filters,
     this.selectedFilter,
+    required this.customFilterSwitch,
+    required this.customFilterImage,
   });
 
   @override
@@ -45,9 +50,20 @@ class _VideoPlayersState extends State<VideoPlayer> {
   bool videoSpeedBar = false;
   ValueNotifier<bool> dragText = ValueNotifier(true);
   ValueNotifier<int> colorValue = ValueNotifier(0xFFFFFFFF);
+  ValueNotifier<Color> selectedFilter = ValueNotifier<Color>(Colors.transparent);
+  ValueNotifier<bool> isFilter = ValueNotifier(false);
+
   String text = '';
   double fontSize = 30;
   final tapiocaBalls = <TapiocaBall>[];
+
+  void isFilterChange() {
+    isFilter.value = !isFilter.value;
+  }
+
+  void _onFilterChanged(Color value) {
+    selectedFilter.value = value;
+  }
 
   String? finishedPath;
 
@@ -69,6 +85,7 @@ class _VideoPlayersState extends State<VideoPlayer> {
         color: Colors.white,
       ),
     );
+    selectedFilter.value = widget.selectedFilter!;
     textDelegate = TextDelegate();
     initVideo();
   }
@@ -186,7 +203,7 @@ class _VideoPlayersState extends State<VideoPlayer> {
                                     },
                                     child: ColorFiltered(
                                       colorFilter: ColorFilter.mode(
-                                        widget.selectedFilter!,
+                                        selectedFilter.value,
                                         BlendMode.softLight,
                                       ),
                                       child: video.VideoPlayer(
@@ -312,12 +329,18 @@ class _VideoPlayersState extends State<VideoPlayer> {
                               onTap: () async {
                                 //! Discard all changes.
                                 texts.clear();
+                                finishedPath = null;
+                                selectedFilter.value = Colors.transparent;
+                                videoTime = 0.0;
+                                timer?.cancel();
+                                timer = null;
                                 _videoPlayerController.dispose();
                                 _videoPlayerController = VideoPlayerController.file(File(widget.video!));
                                 _videoPlayerController.addListener(() {});
                                 _videoPlayerController.setLooping(true);
                                 _videoPlayerController.initialize().then((_) => setState(() {}));
                                 _videoPlayerController.play();
+                                startTimer();
                               },
                               child: Column(
                                 children: [
@@ -414,16 +437,16 @@ class _VideoPlayersState extends State<VideoPlayer> {
                                 GestureDetector(
                                   onTap: () async {
                                     if (finishedPath == null) {
-                                      if (widget.selectedFilter != Colors.transparent && texts.isEmpty) {
+                                      if (selectedFilter != Colors.transparent && texts.isEmpty) {
                                         tapiocaBalls.add(
                                           TapiocaBall.filterFromColor(
-                                            widget.selectedFilter!.withOpacity(.1),
+                                            selectedFilter.value.withOpacity(.1),
                                             100,
                                           ),
                                         );
 
                                         await makeVideo(tapiocaBalls, widget.video);
-                                      } else if (widget.selectedFilter != Colors.transparent && texts.isNotEmpty) {
+                                      } else if (selectedFilter != Colors.transparent && texts.isNotEmpty) {
                                         for (var element in texts) {
                                           final ball = TapiocaBall.textOverlay(
                                             element.name,
@@ -437,13 +460,13 @@ class _VideoPlayersState extends State<VideoPlayer> {
 
                                         tapiocaBalls.add(
                                           TapiocaBall.filterFromColor(
-                                            widget.selectedFilter!.withOpacity(.1),
+                                            selectedFilter.value.withOpacity(.1),
                                             100,
                                           ),
                                         );
 
                                         await makeVideo(tapiocaBalls, widget.video);
-                                      } else if (widget.selectedFilter == Colors.transparent && texts.isNotEmpty) {
+                                      } else if (selectedFilter == Colors.transparent && texts.isNotEmpty) {
                                         for (var element in texts) {
                                           final ball = TapiocaBall.textOverlay(
                                             element.name,
@@ -456,7 +479,7 @@ class _VideoPlayersState extends State<VideoPlayer> {
                                         }
 
                                         await makeVideo(tapiocaBalls, widget.video);
-                                      } else if (widget.selectedFilter == Colors.transparent && texts.isEmpty) {
+                                      } else if (selectedFilter == Colors.transparent && texts.isEmpty) {
                                         finishedPath = widget.video;
                                         Navigator.pop(context);
                                         await (widget.onVideoDone ?? () {})(finishedPath);
@@ -579,7 +602,51 @@ class _VideoPlayersState extends State<VideoPlayer> {
                             ],
                           ),
                         ),
-                        // SizedBox(height: 12),
+                        SizedBox(height: 12),
+                        SizedBox(
+                          height: 80,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(height: 10),
+                              GestureDetector(
+                                onTap: () async {
+                                  isFilterChange();
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Color.fromRGBO(19, 15, 38, 1.0),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10000),
+                                    child: SizedBox(
+                                      height: 30,
+                                      width: 30,
+                                      child: Image.asset(
+                                        widget.customFilterSwitch,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 7),
+                              Expanded(
+                                child: Text(
+                                  "Filters",
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        )
                         // SizedBox(
                         //   height: 70,
                         //   child: Column(
@@ -692,6 +759,27 @@ class _VideoPlayersState extends State<VideoPlayer> {
                       ],
                     ),
                   ),
+                ),
+                ValueListenableBuilder(
+                  valueListenable: isFilter,
+                  builder: (context, value, _) {
+                    if (value == true) {
+                      return Positioned(
+                        left: 0.0,
+                        right: 0.0,
+                        bottom: 0.0,
+                        child: FilterSelector(
+                          filterImage: widget.customFilterImage,
+                          filters: widget.filters,
+                          selectedFilter: selectedFilter.value,
+                          onFilterChanged: _onFilterChanged,
+                          onTap: () {},
+                        ),
+                      );
+                    }
+
+                    return const SizedBox.shrink();
+                  },
                 ),
 
                 // try {
