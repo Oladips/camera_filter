@@ -385,7 +385,8 @@ class _CameraScreenState extends State<CameraScreenPlugin> with TickerProviderSt
       cameras[0],
       ResolutionPreset.high,
       enableAudio: true,
-      imageFormatGroup: Platform.isAndroid ? ImageFormatGroup.jpeg : ImageFormatGroup.bgra8888,
+      imageFormatGroup: ImageFormatGroup.yuv420,
+      // imageFormatGroup: Platform.isAndroid ? ImageFormatGroup.jpeg : ImageFormatGroup.yuv420,
     );
     _currentFlashMode = controller?.value.flashMode;
     await controller?.initialize().then((value) async {
