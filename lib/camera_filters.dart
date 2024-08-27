@@ -428,13 +428,12 @@ class _CameraScreenState extends State<CameraScreenPlugin> with TickerProviderSt
             }
           }
         }
-        return WillPopScope(
-          onWillPop: () async {
-            if (controller!.value.isRecordingVideo) {
-              return false;
-            }
+        return PopScope(
+          canPop: false,
+          onPopInvoked: (didPop) async {
+            if (controller!.value.isRecordingVideo) return;
 
-            return true;
+            return Navigator.pop(context);
           },
           child: SafeArea(
             child: Stack(

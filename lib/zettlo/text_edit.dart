@@ -116,7 +116,7 @@ class _TextEditState extends State<TextEdit> {
                     widget.text.name,
                     style: widget.text.textStyle,
                     textAlign: TextAlign.center,
-                    textScaleFactor: widget.text.scale,
+                    textScaler: TextScaler.linear(widget.text.scale ?? 1),
                   ),
                 ),
               ),

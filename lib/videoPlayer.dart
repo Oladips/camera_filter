@@ -5,7 +5,6 @@ import 'package:camera_filters/src/draw_image.dart';
 import 'package:camera_filters/src/painter.dart';
 import 'package:camera_filters/src/tapioca/content.dart';
 import 'package:camera_filters/src/tapioca/tapioca_ball.dart';
-import 'package:camera_filters/src/widgets/_range_slider.dart';
 import 'package:camera_filters/zettlo/filter_selector.dart';
 import 'package:camera_filters/zettlo/text_edit.dart';
 import 'package:camera_filters/zettlo/text_editing_box.dart';
@@ -127,13 +126,10 @@ class _VideoPlayersState extends State<VideoPlayer> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: WillPopScope(
-        onWillPop: () async {
-          if (isLoading) {
-            return false;
-          }
-
-          return true;
+      child: PopScope(
+        onPopInvoked: (invoke) async {
+          if (isLoading) return;
+          Navigator.pop(context);
         },
         child: Material(
           color: Colors.black,
@@ -781,49 +777,6 @@ class _VideoPlayersState extends State<VideoPlayer> {
                     return const SizedBox.shrink();
                   },
                 ),
-
-                // try {
-                //   var a = 1.7 * int.parse(xPos.toString().split(".")[0]);
-                //   var b = 1.7 * int.parse(yPos.toString().split(".")[0]);
-
-                //   if (text == "" && _filterColor.value.value == 0) {
-                //     widget.onVideoDone!.call(widget.video);
-                //   } else if (text == "" && _filterColor.value.value != 0) {
-                //     final tapiocaBalls = [
-                //       TapiocaBall.filterFromColor(Color(_filterColor.value.value)),
-                //     ];
-                //     makeVideo(tapiocaBalls, path);
-                //   } else if (text != "" && _filterColor.value.value == 0) {
-                //     final tapiocaBalls = [
-                //       TapiocaBall.textOverlay(text, int.parse(a.toString().split(".")[0]), int.parse(b.toString().split(".")[0]), (fontSize * 2).toInt(),
-                //           Color(colorValue.value))
-                //     ];
-                //     makeVideo(tapiocaBalls, path);
-                //   } else {
-                //     final tapiocaBalls = [
-                //       TapiocaBall.filterFromColor(Color(_filterColor.value.value)),
-                //       TapiocaBall.textOverlay(text, int.parse(a.toString().split(".")[0]), int.parse(b.toString().split(".")[0]), (fontSize * 2).toInt(),
-                //           Color(colorValue.value))
-                //     ];
-                //     makeVideo(tapiocaBalls, path);
-                //   }
-                // } on PlatformException {
-                //   print("error!!!!");
-                // }
-                //         },
-                // child: widget.sendButtonWidget ??
-                //     Container(
-                //       height: 60,
-                //       width: 60,
-                //       decoration: BoxDecoration(color: Color(0xffd51820), borderRadius: BorderRadius.circular(60)),
-                //       child: Center(
-                //         child: Icon(Icons.send),
-                //       ),
-                //     ),
-                //       ),
-                //     ),
-                //   ),
-                // ),
               ],
             );
           }),
@@ -865,27 +818,27 @@ class _VideoPlayersState extends State<VideoPlayer> {
     });
   }
 
-  PopupMenuItem _showTextSlider() {
-    return PopupMenuItem(
-      enabled: false,
-      child: SizedBox(
-        width: double.maxFinite,
-        child: ValueListenableBuilder<Controller>(
-          valueListenable: _controller,
-          builder: (_, ctrl, __) {
-            return FontVideoRangedSlider(
-              value: fontSize,
-              onChanged: (value) {
-                _controller.value = ctrl.copyWith(fontSize: value);
-                fontSize = value;
-                setState(() {});
-              },
-            );
-          },
-        ),
-      ),
-    );
-  }
+  // PopupMenuItem _showTextSlider() {
+  //   return PopupMenuItem(
+  //     enabled: false,
+  //     child: SizedBox(
+  //       width: double.maxFinite,
+  //       child: ValueListenableBuilder<Controller>(
+  //         valueListenable: _controller,
+  //         builder: (_, ctrl, __) {
+  //           return FontVideoRangedSlider(
+  //             value: fontSize,
+  //             onChanged: (value) {
+  //               _controller.value = ctrl.copyWith(fontSize: value);
+  //               fontSize = value;
+  //               setState(() {});
+  //             },
+  //           );
+  //         },
+  //       ),
+  //     ),
+  //   );
+  // }
 
   colorPicker(controller) {
     showDialog(

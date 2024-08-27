@@ -491,10 +491,7 @@ class ImagePainterState extends State<ImagePainter> {
     _isLoaded = ValueNotifier<bool>(false);
     _resolveAndConvertImage();
 
-    _controller = ValueNotifier(const Controller().copyWith(
-        mode: widget.initialPaintMode,
-        strokeWidth: widget.initialStrokeWidth,
-        color: widget.initialColor));
+    _controller = ValueNotifier(const Controller().copyWith(mode: widget.initialPaintMode, strokeWidth: widget.initialStrokeWidth, color: widget.initialColor));
 
     _textController = TextEditingController();
     textDelegate = widget.textDelegate ?? TextDelegate();
@@ -511,9 +508,7 @@ class ImagePainterState extends State<ImagePainter> {
   Paint get _painter => Paint()
     ..color = _controller.value.color
     ..strokeWidth = _controller.value.strokeWidth * _strokeMultiplier
-    ..style = _controller.value.mode == PaintMode.freeStyle
-        ? PaintingStyle.stroke
-        : _controller.value.paintStyle;
+    ..style = _controller.value.mode == PaintMode.freeStyle ? PaintingStyle.stroke : _controller.value.paintStyle;
 
   ///Converts the incoming image type from constructor to [ui.Image]
   Future<void> _resolveAndConvertImage() async {
@@ -575,8 +570,7 @@ class ImagePainterState extends State<ImagePainter> {
   Future<ui.Image> _loadNetworkImage(String path) async {
     final completer = Completer<ImageInfo>();
     var img = NetworkImage(path);
-    img.resolve(const ImageConfiguration()).addListener(
-        ImageStreamListener((info, _) => completer.complete(info)));
+    img.resolve(const ImageConfiguration()).addListener(ImageStreamListener((info, _) => completer.complete(info)));
     final imageInfo = await completer.future;
     _isLoaded.value = true;
     return imageInfo.image;
@@ -627,13 +621,10 @@ class ImagePainterState extends State<ImagePainter> {
                             minScale: 1,
                             panEnabled: controller.mode == PaintMode.none,
                             scaleEnabled: widget.isScalable!,
-                            onInteractionUpdate: (details) =>
-                                _scaleUpdateGesture(details, controller),
-                            onInteractionEnd: (details) =>
-                                _scaleEndGesture(details, controller),
+                            onInteractionUpdate: (details) => _scaleUpdateGesture(details, controller),
+                            onInteractionEnd: (details) => _scaleEndGesture(details, controller),
                             child: CustomPaint(
-                              size: Size(_image!.width.toDouble(),
-                                  _image!.height.toDouble()),
+                              size: Size(_image!.width.toDouble(), _image!.height.toDouble()),
                               willChange: true,
                               isComplex: true,
                               painter: DrawImage(
@@ -645,11 +636,7 @@ class ImagePainterState extends State<ImagePainter> {
                                 paintHistory: _paintHistory,
                                 isDragging: _inDrag,
                                 fontColor: fontColor,
-                                update: UpdatePoints(
-                                    start: _start,
-                                    end: _end,
-                                    painter: _painter,
-                                    mode: controller.mode),
+                                update: UpdatePoints(start: _start, end: _end, painter: _painter, mode: controller.mode),
                               ),
                             ),
                           );
@@ -677,8 +664,7 @@ class ImagePainterState extends State<ImagePainter> {
                                   shrinkWrap: true,
                                   itemBuilder: (context, i) {
                                     return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 3),
+                                      padding: const EdgeInsets.symmetric(horizontal: 3),
                                       child: GestureDetector(
                                         onTap: () {
                                           index = i;
@@ -687,10 +673,7 @@ class ImagePainterState extends State<ImagePainter> {
                                         child: Container(
                                           height: 40,
                                           width: 40,
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(5)),
+                                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(5)),
                                           child: Center(
                                               child: Text(
                                             "f",
@@ -728,9 +711,7 @@ class ImagePainterState extends State<ImagePainter> {
             child: ValueListenableBuilder<bool>(
                 valueListenable: upAndDown,
                 builder: (_, controller, __) {
-                  return upAndDown.value == false
-                      ? Container()
-                      : buildIconsColumn();
+                  return upAndDown.value == false ? Container() : buildIconsColumn();
                 }),
           )
         ],
@@ -746,8 +727,7 @@ class ImagePainterState extends State<ImagePainter> {
         return Center(child: CircularProgressIndicator());
       },
     );
-    RenderRepaintBoundary boundary =
-        _globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    RenderRepaintBoundary boundary = _globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
     ui.Image image = await boundary.toImage(pixelRatio: 3.0);
     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     Uint8List pngBytes = byteData!.buffer.asUint8List();
@@ -770,13 +750,8 @@ class ImagePainterState extends State<ImagePainter> {
         _start ??= onUpdate.focalPoint;
         _end = onUpdate.focalPoint;
         if (ctrl.mode == PaintMode.freeStyle) _points.add(_end);
-        if (ctrl.mode == PaintMode.text &&
-            _paintHistory
-                .where((element) => element.mode == PaintMode.text)
-                .isNotEmpty) {
-          _paintHistory
-              .lastWhere((element) => element.mode == PaintMode.text)
-              .offset = [_end];
+        if (ctrl.mode == PaintMode.text && _paintHistory.where((element) => element.mode == PaintMode.text).isNotEmpty) {
+          _paintHistory.lastWhere((element) => element.mode == PaintMode.text).offset = [_end];
         }
       },
     );
@@ -786,15 +761,11 @@ class ImagePainterState extends State<ImagePainter> {
   void _scaleEndGesture(ScaleEndDetails onEnd, Controller controller) {
     setState(() {
       _inDrag = false;
-      if (_start != null &&
-          _end != null &&
-          (controller.mode == PaintMode.freeStyle)) {
+      if (_start != null && _end != null && (controller.mode == PaintMode.freeStyle)) {
         _points.add(null);
         _addFreeStylePoints();
         _points.clear();
-      } else if (_start != null &&
-          _end != null &&
-          controller.mode != PaintMode.text) {
+      } else if (_start != null && _end != null && controller.mode != PaintMode.text) {
         _addEndPoints();
       }
       _start = null;
@@ -822,16 +793,10 @@ class ImagePainterState extends State<ImagePainter> {
   Future<ui.Image> _renderImage() async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
-    final painter = DrawImage(
-        image: _image,
-        paintHistory: _paintHistory,
-        fontSize: fontSize,
-        fontColor: fontColor);
+    final painter = DrawImage(image: _image, paintHistory: _paintHistory, fontSize: fontSize, fontColor: fontColor);
     final size = Size(_image!.width.toDouble(), _image!.height.toDouble());
     painter.paint(canvas, size);
-    return recorder
-        .endRecording()
-        .toImage(size.width.floor(), size.height.floor());
+    return recorder.endRecording().toImage(size.width.floor(), size.height.floor());
   }
 
   PopupMenuItem _showRangeSlider() {
@@ -886,16 +851,14 @@ class ImagePainterState extends State<ImagePainter> {
   Future<Uint8List?> exportImage() async {
     late ui.Image _convertedImage;
     if (widget.isSignature) {
-      final _boundary = _repaintKey.currentContext!.findRenderObject()
-          as RenderRepaintBoundary;
+      final _boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
       _convertedImage = await _boundary.toImage(pixelRatio: 3);
     } else if (widget.byteArray != null && _paintHistory.isEmpty) {
       return widget.byteArray;
     } else {
       _convertedImage = await _renderImage();
     }
-    final byteData =
-        await _convertedImage.toByteData(format: ui.ImageByteFormat.png);
+    final byteData = await _convertedImage.toByteData(format: ui.ImageByteFormat.png);
     return byteData?.buffer.asUint8List();
   }
 
@@ -941,16 +904,11 @@ class ImagePainterState extends State<ImagePainter> {
     _controller.value = _controller.value.copyWith(mode: PaintMode.text);
     double fontSize = 18;
 
-    TextDialog.show(context, _textController, fontSize, _controller.value.color,
-        textDelegate, onFinished: (c) {
+    TextDialog.show(context, _textController, fontSize, _controller.value.color, textDelegate, onFinished: (c) {
       if (_textController.text != '') {
         setState(() {
           _addPaintHistory(
-            PaintInfo(
-                mode: PaintMode.text,
-                text: _textController.text,
-                painter: _painter,
-                offset: []),
+            PaintInfo(mode: PaintMode.text, text: _textController.text, painter: _painter, offset: []),
           );
         });
         _textController.clear();
@@ -981,11 +939,7 @@ class ImagePainterState extends State<ImagePainter> {
                     valueListenable: upAndDown,
                     builder: (_, controller, __) {
                       return IconButton(
-                        icon: Icon(
-                            upAndDown.value == false
-                                ? Icons.keyboard_arrow_down
-                                : Icons.keyboard_arrow_up,
-                            color: Colors.white),
+                        icon: Icon(upAndDown.value == false ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_up, color: Colors.white),
                         onPressed: () {
                           if (upAndDown.value == false) {
                             upAndDown.value = true;
@@ -1009,19 +963,15 @@ class ImagePainterState extends State<ImagePainter> {
         ? Container()
         : Container(
             padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-            decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(30),
-                    bottomLeft: Radius.circular(30))),
+            decoration:
+                BoxDecoration(color: Colors.black12, borderRadius: BorderRadius.only(bottomRight: Radius.circular(30), bottomLeft: Radius.circular(30))),
             child: Column(
               children: [
                 ValueListenableBuilder<Controller>(
                     valueListenable: _controller,
                     builder: (_, controller, __) {
                       return IconButton(
-                        icon: Icon(Icons.font_download_rounded,
-                            color: Colors.white),
+                        icon: Icon(Icons.font_download_rounded, color: Colors.white),
                         onPressed: () {
                           fonts.value = !fonts.value;
                         },
@@ -1053,8 +1003,7 @@ class ImagePainterState extends State<ImagePainter> {
                   shape: ContinuousRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  icon: widget.brushIcon ??
-                      Icon(Icons.brush, color: Colors.white),
+                  icon: widget.brushIcon ?? Icon(Icons.brush, color: Colors.white),
                   itemBuilder: (_) => [_showRangeSlider()],
                 ),
                 IconButton(
@@ -1074,8 +1023,7 @@ class ImagePainterState extends State<ImagePainter> {
                 ),
                 IconButton(
                   tooltip: textDelegate.clearAllProgress,
-                  icon: widget.clearAllIcon ??
-                      Icon(Icons.clear, color: Colors.white),
+                  icon: widget.clearAllIcon ?? Icon(Icons.clear, color: Colors.white),
                   onPressed: () {
                     setState(_paintHistory.clear);
                   },
@@ -1089,24 +1037,24 @@ class ImagePainterState extends State<ImagePainter> {
   Future _cropImage() async {
     CroppedFile? croppedFile = await ImageCropper().cropImage(
         sourcePath: widget.file!.path,
-        aspectRatioPresets: Platform.isAndroid
-            ? [
-                CropAspectRatioPreset.square,
-                CropAspectRatioPreset.ratio3x2,
-                CropAspectRatioPreset.original,
-                CropAspectRatioPreset.ratio4x3,
-                CropAspectRatioPreset.ratio16x9
-              ]
-            : [
-                CropAspectRatioPreset.original,
-                CropAspectRatioPreset.square,
-                CropAspectRatioPreset.ratio3x2,
-                CropAspectRatioPreset.ratio4x3,
-                CropAspectRatioPreset.ratio5x3,
-                CropAspectRatioPreset.ratio5x4,
-                CropAspectRatioPreset.ratio7x5,
-                CropAspectRatioPreset.ratio16x9
-              ],
+        // aspectRatioPresets: Platform.isAndroid
+        //     ? [
+        //         CropAspectRatioPreset.square,
+        //         CropAspectRatioPreset.ratio3x2,
+        //         CropAspectRatioPreset.original,
+        //         CropAspectRatioPreset.ratio4x3,
+        //         CropAspectRatioPreset.ratio16x9
+        //       ]
+        //     : [
+        //         CropAspectRatioPreset.original,
+        //         CropAspectRatioPreset.square,
+        //         CropAspectRatioPreset.ratio3x2,
+        //         CropAspectRatioPreset.ratio4x3,
+        //         CropAspectRatioPreset.ratio5x3,
+        //         CropAspectRatioPreset.ratio5x4,
+        //         CropAspectRatioPreset.ratio7x5,
+        //         CropAspectRatioPreset.ratio16x9
+        //       ],
         uiSettings: [
           AndroidUiSettings(
               toolbarTitle: 'Crop',
@@ -1169,22 +1117,11 @@ class Controller {
 
   @override
   int get hashCode {
-    return strokeWidth.hashCode ^
-        color.hashCode ^
-        paintStyle.hashCode ^
-        mode.hashCode ^
-        fontSize.hashCode ^
-        text.hashCode;
+    return strokeWidth.hashCode ^ color.hashCode ^ paintStyle.hashCode ^ mode.hashCode ^ fontSize.hashCode ^ text.hashCode;
   }
 
   ///copyWith Method to access immutable controller.
-  Controller copyWith(
-      {double? strokeWidth,
-      double? fontSize,
-      Color? color,
-      PaintMode? mode,
-      PaintingStyle? paintingStyle,
-      String? text}) {
+  Controller copyWith({double? strokeWidth, double? fontSize, Color? color, PaintMode? mode, PaintingStyle? paintingStyle, String? text}) {
     return Controller(
         strokeWidth: strokeWidth ?? this.strokeWidth,
         color: color ?? this.color,
@@ -1298,8 +1235,7 @@ class _GradientCircularProgressPainter extends CustomPainter {
     double _start = .0;
 
     double _offset = strokeWidth! / 2;
-    Rect rect = Offset(_offset, _offset) &
-        Size(size.width - strokeWidth!, size.height - strokeWidth!);
+    Rect rect = Offset(_offset, _offset) & Size(size.width - strokeWidth!, size.height - strokeWidth!);
 
     var paint = Paint()
       ..strokeWidth = strokeWidth!
@@ -1312,12 +1248,7 @@ class _GradientCircularProgressPainter extends CustomPainter {
     }
 
     if (_value > 0) {
-      paint.shader = SweepGradient(
-              colors: gradientColors!,
-              startAngle: 0.0,
-              endAngle: _value,
-              stops: gradientStops)
-          .createShader(rect);
+      paint.shader = SweepGradient(colors: gradientColors!, startAngle: 0.0, endAngle: _value, stops: gradientStops).createShader(rect);
 
       canvas.drawArc(rect, _start, _value, false, paint);
     }

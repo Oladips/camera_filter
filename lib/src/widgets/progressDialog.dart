@@ -17,10 +17,8 @@ BuildContext? _context, _dismissingContext;
 ProgressDialogType? _progressDialogType;
 bool _barrierDismissible = true, _showLogs = false;
 
-TextStyle _progressTextStyle = TextStyle(
-        color: Colors.white, fontSize: 12.0, fontWeight: FontWeight.w400),
-    _messageStyle = TextStyle(
-        color: Colors.black, fontSize: 18.0, fontWeight: FontWeight.w600);
+TextStyle _progressTextStyle = TextStyle(color: Colors.white, fontSize: 12.0, fontWeight: FontWeight.w400),
+    _messageStyle = TextStyle(color: Colors.black, fontSize: 18.0, fontWeight: FontWeight.w600);
 
 double _dialogElevation = 8.0, _borderRadius = 8.0;
 Color _backgroundColor = Colors.white;
@@ -35,11 +33,7 @@ class ProgressDialog {
   _Body? _dialog;
 
   ProgressDialog(BuildContext context,
-      {ProgressDialogType? type,
-      bool? isDismissible = false,
-      bool? showLogs,
-      TextDirection? textDirection,
-      Widget? customBody}) {
+      {ProgressDialogType? type, bool? isDismissible = false, bool? showLogs, TextDirection? textDirection, Widget? customBody}) {
     _context = context;
     _progressDialogType = type ?? ProgressDialogType.normal;
     _barrierDismissible = isDismissible ?? true;
@@ -80,17 +74,10 @@ class ProgressDialog {
     _textAlign = textAlign ?? _textAlign;
     _progressWidget = child ?? _progressWidget;
     _dialogPadding = padding ?? _dialogPadding;
-    _progressWidgetAlignment =
-        progressWidgetAlignment ?? _progressWidgetAlignment;
+    _progressWidgetAlignment = progressWidgetAlignment ?? _progressWidgetAlignment;
   }
 
-  void update(
-      {double? progress,
-      double? maxProgress,
-      String? message,
-      Widget? progressWidget,
-      TextStyle? progressTextStyle,
-      TextStyle? messageTextStyle}) {
+  void update({double? progress, double? maxProgress, String? message, Widget? progressWidget, TextStyle? progressTextStyle, TextStyle? messageTextStyle}) {
     if (_progressDialogType == ProgressDialogType.download) {
       _progress = progress ?? _progress;
     }
@@ -135,17 +122,16 @@ class ProgressDialog {
           barrierDismissible: _barrierDismissible,
           builder: (BuildContext context) {
             _dismissingContext = context;
-            return WillPopScope(
-              onWillPop: () async => _barrierDismissible,
+            return PopScope(
+              canPop: _barrierDismissible,
               child: Dialog(
-                  backgroundColor: _backgroundColor,
-                  insetAnimationCurve: _insetAnimCurve,
-                  insetAnimationDuration: Duration(milliseconds: 100),
-                  elevation: _dialogElevation,
-                  shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.all(Radius.circular(_borderRadius))),
-                  child: _dialog),
+                backgroundColor: _backgroundColor,
+                insetAnimationCurve: _insetAnimCurve,
+                insetAnimationDuration: Duration(milliseconds: 100),
+                elevation: _dialogElevation,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(_borderRadius))),
+                child: _dialog,
+              ),
             );
           },
         );

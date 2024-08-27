@@ -15,14 +15,14 @@ dependencies:
   flutter_colorpicker: ^1.0.3
   flutter_native_image: ^0.0.6+1
   get_storage: ^2.1.1
-  google_fonts: ^4.0.3
-  image: ^4.0.17
-  image_cropper: ^4.0.1
-  image_picker: ^1.0.1
-  path_provider: ^2.0.15
+  google_fonts: ^6.2.1
+  image: ^4.2.0
+  image_cropper: ^8.0.2
+  image_picker: ^1.1.2
+  path_provider: ^2.1.4
   vector_math: ^2.1.4
-  dotted_border: ^2.0.0+3
-  video_player: ^2.7.0
+  dotted_border: ^2.1.0
+  video_player: ^2.9.1
 dev_dependencies:
   analyzer: null
   flutter_lints: ^2.0.1

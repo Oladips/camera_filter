@@ -32,13 +32,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  final int _counter = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => Camera(),
+              builder: (_) => const Camera(),
             ),
           );
         },
@@ -96,10 +90,7 @@ class _CameraState extends State<Camera> {
         cuatomCameraSwitch: "cuatomCameraSwitch",
         customFilterSwitch: "customFilterSwitch",
         customFilterImage: "customFilterSwitch",
-        onVideoDone: (p0) {
-          print("object");
-          print(p0);
-        },
+        onVideoDone: (p0) {},
       ),
     );
   }
