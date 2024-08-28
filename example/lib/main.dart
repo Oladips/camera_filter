@@ -82,15 +82,11 @@ class _CameraState extends State<Camera> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: CameraScreenPlugin(
         maxHeight: MediaQuery.of(context).size.height,
         maxWidth: MediaQuery.of(context).size.width,
-        customGalleryImage: "customGalleryImage",
-        customOrangeCheckImage: "customOrangeCheckImage",
-        cuatomCameraSwitch: "cuatomCameraSwitch",
-        customFilterSwitch: "customFilterSwitch",
-        customFilterImage: "customFilterSwitch",
-        onVideoDone: (p0) {},
+        onVideoDone: (videoFile) {},
       ),
     );
   }
