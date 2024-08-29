@@ -427,6 +427,7 @@ class _CameraScreenState extends State<CameraScreenPlugin> with TickerProviderSt
                                                     if (!mounted) return;
                                                     if (video != null) {
                                                       stopRecorderTimer();
+                                                      await widget.onVideoDone(video);
                                                     }
                                                   },
                                                   child: Container(
